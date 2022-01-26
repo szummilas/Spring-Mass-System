@@ -16,8 +16,10 @@ void Point::setup(ofColor _color, float _radius, float _mass, glm::vec2 _positio
 }
 
 void Point::draw() {
+
 	ofSetColor(color);
 	ofDrawCircle(position, radius);
+
 }
 
 bool Point::isMouseOnIt(glm::vec2& mousePosition) {

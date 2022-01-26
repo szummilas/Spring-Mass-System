@@ -2,6 +2,8 @@
 # Created by https://www.toptal.com/developers/gitignore/api/visualstudio,c++,openframeworks
 # Edit at https://www.toptal.com/developers/gitignore?templates=visualstudio,c++,openframeworks
 
+/Documents/*
+
 ### C++ ###
 # Prerequisites
 *.d

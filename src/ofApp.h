@@ -21,10 +21,6 @@ class ofApp : public ofBaseApp{
 		void windowResized(int w, int h);
 		void dragEvent(ofDragInfo dragInfo);
 		void gotMessage(ofMessage msg);
-		
-		// colors
-		ofColor cRED = ofColor::paleVioletRed;
-		ofColor cWHITE = ofColor::ghostWhite;
 
 		Point staticPoint;
 		Point activePoint;
@@ -33,7 +29,26 @@ class ofApp : public ofBaseApp{
 		Point staticPoint2;
 		Point p5;
 
+		int HOW_MANY_POINTS = 50;
+
+		float lineSegmentLength = 10;
+
+		glm::vec2 startingPoint = { ofGetWidth() / 2, 10 };
+
 		float deltaTime;
 
 		std::vector<Point> points;
+
+		// clear force vector
+		void clearForce();
+
+		// calculate spring force and add it to force vect.
+		void springForce();
+
+		// calculate gravity force and add it to force vect.
+		void gravity();
+
+		// motion equation, verlet integration
+		void verlet();
+
 };
