@@ -12,6 +12,7 @@ public:
 
 	float radius;
 	float mass;
+	float displacement;
 	
 	glm::vec2 position;
 	glm::vec2 positionOld;

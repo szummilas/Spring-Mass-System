@@ -2,29 +2,15 @@
 
 //--------------------------------------------------------------
 void ofApp::setup() {
+	
+	setupLine(HOW_MANY_POINTS, lineSegmentLength, temp_mass);
 
-	for (int i = 0; i <= HOW_MANY_POINTS; i++) {
-
-		Point newPoint;
-
-		newPoint.setup(ofColor::gray, 2, 1, { startingPoint.x, startingPoint.y + i * lineSegmentLength }, false);
-
-		if (i == 0) {
-			newPoint.color = ofColor::white;
-			newPoint.radius = 6;
-			newPoint.isLocked = true;
-		}
-
-		if (i == HOW_MANY_POINTS) {
-			newPoint.color = ofColor::lightGoldenRodYellow;
-			newPoint.radius = 10;
-			newPoint.mass = 10;
-		}
-
-		points.push_back(newPoint);
-
-	}
-
+	guiName = "settings";
+	gui.setup(guiName);
+	gui.add(guiLabel.setup("  SETTINGS  ", ""));
+	gui.add(lineSegmentLengthSlider.setup("Segment length", lineSegmentLength, 6, 50));
+	gui.add(numOfPointsSlider.setup("Number of the segments", HOW_MANY_POINTS, 3, 50));
+	gui.add(massSlider.setup("Mass of the last point", temp_mass, 3, 50));
 }
 
 //--------------------------------------------------------------
@@ -33,15 +19,29 @@ void ofApp::update(){
 	deltaTime = 0.03;
 
 	clearForce();
-	springForce();
+	springForce(lineSegmentLength);
 	gravity();
 	verlet();
-	
+
+	if (lineSegmentLengthSlider != lineSegmentLength
+		|| numOfPointsSlider != HOW_MANY_POINTS
+		|| massSlider != points[HOW_MANY_POINTS].mass) {
+
+		lineSegmentLength = lineSegmentLengthSlider;
+		HOW_MANY_POINTS = numOfPointsSlider; 
+		temp_mass = massSlider;
+
+		points.clear();
+		setupLine(HOW_MANY_POINTS, lineSegmentLength, temp_mass);
+	}
+
 }
 
 //--------------------------------------------------------------
 void ofApp::draw(){
 	
+	gui.draw();
+
 	for (int i = 0; i < points.size(); i++) {
 
 		if (i != points.size() - 1) {
@@ -112,17 +112,17 @@ void ofApp::clearForce() {
 	}
 }
 
-void ofApp::springForce() {
+void ofApp::springForce(int& _lineSegmentLength) {
 
 	for (int i = 0; i < points.size() - 1; i++) {
 
 		glm::vec2 directionalVector = points[i].position - points[i + 1].position;
 
-		float displacement = glm::distance(points[i].position, points[i + 1].position) - lineSegmentLength;
+		points[i].displacement = glm::distance(points[i].position, points[i + 1].position) - _lineSegmentLength;
 
 		directionalVector = glm::normalize(directionalVector);
 
-		glm::vec2 springForce = 1000 * displacement * directionalVector;
+		glm::vec2 springForce = 1000 * points[i].displacement * directionalVector;
 
 		points[i].force -= springForce;
 		points[i + 1].force += springForce;
@@ -158,6 +158,31 @@ void ofApp::verlet() {
 
 		else { }
 
+	}
+}
+
+void ofApp::setupLine(int& _HOW_MANY_POINTS, int& _lineSegmentLength, int& _lastMass) {
+
+	for (int i = 0; i <= _HOW_MANY_POINTS; i++) {
+
+		Point newPoint;
+
+		newPoint.setup(ofColor::gray, 2, 1, { startingPoint.x, startingPoint.y + i * _lineSegmentLength }, false);
+		newPoint.force = { 0, 0 };
+
+		if (i == 0) {
+			newPoint.color = ofColor::white;
+			newPoint.radius = 6;
+			newPoint.isLocked = true;
+		}
+
+		if (i == _HOW_MANY_POINTS) {
+			newPoint.color = ofColor::lightGoldenRodYellow;
+			newPoint.radius = 10;
+			newPoint.mass = _lastMass;
+		}
+
+		points.push_back(newPoint);
 	}
 }
 

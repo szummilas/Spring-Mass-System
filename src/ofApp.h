@@ -1,6 +1,7 @@
 #pragma once
 
 #include "ofMain.h"
+#include "ofxGui.h"
 #include "point.h"
 
 class ofApp : public ofBaseApp{
@@ -22,16 +23,11 @@ class ofApp : public ofBaseApp{
 		void dragEvent(ofDragInfo dragInfo);
 		void gotMessage(ofMessage msg);
 
-		Point staticPoint;
-		Point activePoint;
-		Point p3;
-		Point p4;
-		Point staticPoint2;
-		Point p5;
-
 		int HOW_MANY_POINTS = 50;
 
-		float lineSegmentLength = 10;
+		int lineSegmentLength = 10;
+
+		int temp_mass = 10;
 
 		glm::vec2 startingPoint = { ofGetWidth() / 2, 10 };
 
@@ -43,7 +39,7 @@ class ofApp : public ofBaseApp{
 		void clearForce();
 
 		// calculate spring force and add it to force vect.
-		void springForce();
+		void springForce(int& _lineSegmentLength);
 
 		// calculate gravity force and add it to force vect.
 		void gravity();
@@ -51,4 +47,14 @@ class ofApp : public ofBaseApp{
 		// motion equation, verlet integration
 		void verlet();
 
+		// setup points vector
+		void setupLine(int& _HOW_MANY_POINTS, int& _lineSegmentLength, int& _lastMass);
+
+		ofxPanel gui;
+		ofxLabel guiLabel;
+		ofxIntSlider lineSegmentLengthSlider;
+		ofxIntSlider numOfPointsSlider;
+		ofxIntSlider massSlider;
+
+		std::string guiName;
 };
