@@ -23,9 +23,9 @@ class ofApp : public ofBaseApp{
 		void dragEvent(ofDragInfo dragInfo);
 		void gotMessage(ofMessage msg);
 
-		int HOW_MANY_POINTS = 50;
+		int HOW_MANY_POINTS = 60;
 
-		int lineSegmentLength = 10;
+		int lineSegmentLength = 6;
 
 		int temp_mass = 10;
 
@@ -33,7 +33,9 @@ class ofApp : public ofBaseApp{
 
 		float deltaTime;
 
-		std::vector<Point> points;
+		int current;
+
+		std::vector<Point*> points;
 
 		// clear force vector
 		void clearForce();
@@ -49,6 +51,12 @@ class ofApp : public ofBaseApp{
 
 		// setup points vector
 		void setupLine(int& _HOW_MANY_POINTS, int& _lineSegmentLength, int& _lastMass);
+
+		// ------ CLOTH --------
+
+		glm::vec2 size;
+
+		// ------ GUI --------
 
 		ofxPanel gui;
 		ofxLabel guiLabel;

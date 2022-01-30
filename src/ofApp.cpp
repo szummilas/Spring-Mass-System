@@ -5,12 +5,19 @@ void ofApp::setup() {
 	
 	setupLine(HOW_MANY_POINTS, lineSegmentLength, temp_mass);
 
+
+	// ------ GUI --------
+
 	guiName = "settings";
 	gui.setup(guiName);
 	gui.add(guiLabel.setup("  SETTINGS  ", ""));
 	gui.add(lineSegmentLengthSlider.setup("Segment length", lineSegmentLength, 6, 50));
 	gui.add(numOfPointsSlider.setup("Number of the segments", HOW_MANY_POINTS, 3, 50));
 	gui.add(massSlider.setup("Mass of the last point", temp_mass, 3, 50));
+
+	// ----- DEBUG -------
+
+	std::cout << points.size() << '\n';
 }
 
 //--------------------------------------------------------------
@@ -19,13 +26,30 @@ void ofApp::update(){
 	deltaTime = 0.03;
 
 	clearForce();
-	springForce(lineSegmentLength);
-	gravity();
-	verlet();
 
-	if (lineSegmentLengthSlider != lineSegmentLength
+	for (int i = 0; i < points.size(); i++) {
+
+		points[i]->SpringForce(lineSegmentLength);
+	
+	}
+
+	
+
+	gravity();
+
+	for (int i = 0; i < points.size(); i++) {
+
+		points[i]->Verlet(points[i]->isLocked, deltaTime);
+
+	}
+
+	//verlet();
+
+	// ------ GUI --------
+
+	/*if (lineSegmentLengthSlider != lineSegmentLength
 		|| numOfPointsSlider != HOW_MANY_POINTS
-		|| massSlider != points[HOW_MANY_POINTS].mass) {
+		|| massSlider != points[HOW_MANY_POINTS]->mass) {
 
 		lineSegmentLength = lineSegmentLengthSlider;
 		HOW_MANY_POINTS = numOfPointsSlider; 
@@ -33,23 +57,31 @@ void ofApp::update(){
 
 		points.clear();
 		setupLine(HOW_MANY_POINTS, lineSegmentLength, temp_mass);
-	}
+	}*/
 
 }
 
 //--------------------------------------------------------------
 void ofApp::draw(){
-	
+	// ------ GUI --------
+
 	gui.draw();
+
+
+	// ------ OTHER --------
 
 	for (int i = 0; i < points.size(); i++) {
 
-		if (i != points.size() - 1) {
-			ofSetColor(ofColor(202, 188, 165));
-			ofDrawLine(points[i].position, points[i + 1].position);
-		}
+		for (int j = 0; j < points[i]->links.size(); j++) {
 
-		points[i].draw();
+			ofSetColor(ofColor(202, 188, 165));
+			ofDrawLine(points[i]->links[j].p1->position, points[i]->links[j].p2->position);
+
+		}
+		
+		points[i]->draw();
+
+		//ofDrawBitmapString(points[i]->grid, points[i]->position);
 	}
 }
 
@@ -107,7 +139,7 @@ void ofApp::clearForce() {
 
 	for (int i = 0; i < points.size(); i++) {
 
-		points[i].force = { 0, 0 };
+		points[i]->force = { 0, 0 };
 
 	}
 }
@@ -116,16 +148,16 @@ void ofApp::springForce(int& _lineSegmentLength) {
 
 	for (int i = 0; i < points.size() - 1; i++) {
 
-		glm::vec2 directionalVector = points[i].position - points[i + 1].position;
+		glm::vec2 directionalVector = points[i]->position - points[i + 1]->position;
 
-		points[i].displacement = glm::distance(points[i].position, points[i + 1].position) - _lineSegmentLength;
+		points[i]->displacement = glm::distance(points[i]->position, points[i + 1]->position) - _lineSegmentLength;
 
 		directionalVector = glm::normalize(directionalVector);
 
-		glm::vec2 springForce = 1000 * points[i].displacement * directionalVector;
+		glm::vec2 springForce = 1000 * points[i]->displacement * directionalVector;
 
-		points[i].force -= springForce;
-		points[i + 1].force += springForce;
+		points[i]->force -= springForce;
+		points[i + 1]->force += springForce;
 
 	}
 }
@@ -135,11 +167,11 @@ void ofApp::gravity() {
 	for (int i = 0; i < points.size(); i++) {
 		
 		// gravity vector
-		glm::vec2 gravity = { 0.5, 9.81 };
+		glm::vec2 gravity = { -2.5, 9.81 };
 
-		gravity *= points[i].mass;
+		gravity *= points[i]->mass;
 
-		points[i].force += gravity;
+		points[i]->force += gravity;
 	}
 }
 
@@ -147,13 +179,13 @@ void ofApp::verlet() {
 
 	for (int i = 0; i < points.size(); i++) {
 
-		if (!points[i].isLocked) {
+		if (!points[i]->isLocked) {
 
-			glm::vec2 tempPositionOld = points[i].position;
+			glm::vec2 tempPositionOld = points[i]->position;
 
-			points[i].position = points[i].position + (points[i].position - points[i].positionOld) + deltaTime * deltaTime * (points[i].force / points[i].mass);
+			points[i]->position = points[i]->position + (points[i]->position - points[i]->positionOld) + deltaTime * deltaTime * (points[i]->force / points[i]->mass);
 
-			points[i].positionOld = tempPositionOld;
+			points[i]->positionOld = tempPositionOld;
 		}
 
 		else { }
@@ -163,27 +195,63 @@ void ofApp::verlet() {
 
 void ofApp::setupLine(int& _HOW_MANY_POINTS, int& _lineSegmentLength, int& _lastMass) {
 
-	for (int i = 0; i <= _HOW_MANY_POINTS; i++) {
+	size = { 81, HOW_MANY_POINTS };
+	current = 0;
 
-		Point newPoint;
+	for (int y = 0; y < size.y; y++) {
+		
+		for (int x = 0; x < size.x; x++) {
 
-		newPoint.setup(ofColor::gray, 2, 1, { startingPoint.x, startingPoint.y + i * _lineSegmentLength }, false);
-		newPoint.force = { 0, 0 };
+			Point* newPoint = new Point();
 
-		if (i == 0) {
-			newPoint.color = ofColor::white;
-			newPoint.radius = 6;
-			newPoint.isLocked = true;
+			newPoint->setup(ofColor::gray, 2, 1, { startingPoint.x + x * _lineSegmentLength, startingPoint.y + y * _lineSegmentLength }, false);
+			newPoint->force = { 0, 0 };
+			newPoint->id = current;
+			newPoint->grid = { x, y };
+
+			if (y == 0) {
+				newPoint->color = ofColor::white;
+				newPoint->radius = 2;
+				newPoint->isLocked = true;
+			}
+
+			points.push_back(newPoint);
+			current++;
 		}
-
-		if (i == _HOW_MANY_POINTS) {
-			newPoint.color = ofColor::lightGoldenRodYellow;
-			newPoint.radius = 10;
-			newPoint.mass = _lastMass;
-		}
-
-		points.push_back(newPoint);
 	}
+
+	current = 0;
+
+	for (int y = 0; y < size.y; y++) {
+
+		for (int x = 0; x < size.x; x++) {
+
+			if (y != 0) {
+
+				int above = (y - 1) * size.x + x;
+
+				Link l;
+				l.p1 = points[current];
+				l.p2 = points[above];
+
+				points[current]->links.push_back(l);
+			}
+
+			if (x != 0) {
+				int left = current - 1;
+
+				Link l;
+				l.p1 = points[current];
+				l.p2 = points[left];
+
+				points[current]->links.push_back(l);
+			}
+
+			current++;
+		}
+
+	}
+
 }
 
 //--------------------------------------------------------------
