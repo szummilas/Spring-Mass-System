@@ -15,10 +15,7 @@ void Point::setup(ofColor _color, float _radius, float _mass, glm::vec2 _positio
 	velocity = { 0, 0 };
 	force = { 0, 0 };
 
-	id = 0;
 	grid = { 0, 0 };
-
-	isClicked = false;
 }
 
 void Point::draw() {
@@ -28,7 +25,7 @@ void Point::draw() {
 
 }
 
-void Point::SpringForce(int& _lineSegmentLength) {
+void Point::SpringForce(int& _lineSegmentLength, int& _k) {
 
 	for (int i = 0; i < links.size(); i++) {
 
@@ -38,7 +35,7 @@ void Point::SpringForce(int& _lineSegmentLength) {
 
 		directionalVector = glm::normalize(directionalVector);
 
-		glm::vec2 springForce = 500 * links[i].p1->displacement * directionalVector;
+		glm::vec2 springForce = _k * links[i].p1->displacement * directionalVector;
 
 		links[i].p1->force -= springForce;
 		links[i].p2->force += springForce;
@@ -56,12 +53,3 @@ void Point::Verlet(bool& _isLocked, float& _deltaTime) {
 		positionOld = tempPositionOld;
 	}
 }
-
-//bool Point::isMouseOnIt(glm::vec2& mousePosition) {
-//
-//	float distance = sqrt(pow((mousePosition.x - position.x), 2) + pow((mousePosition.y - position.y), 2));
-//
-//	if (distance <= radius) { return true; }
-//
-//	else { return false; }
-//}

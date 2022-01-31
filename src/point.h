@@ -19,14 +19,11 @@ public:
 	void setup(ofColor _color, float _radius, float _mass, glm::vec2 _positionAtStart, bool _isLocked);
 	void draw();
 
-	void SpringForce(int& _lineSegmentLength);
+	void SpringForce(int& _lineSegmentLength, int& _k);
 	void Verlet(bool& _isLocked, float& _deltaTime);
 
-	//bool isMouseOnIt(glm::vec2& mousePosition);
-	bool isClicked;
 	bool isLocked;
 
-	unsigned int id;
 	glm::vec2 grid;
 
 	float radius;

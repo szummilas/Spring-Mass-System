@@ -23,17 +23,21 @@ class ofApp : public ofBaseApp{
 		void dragEvent(ofDragInfo dragInfo);
 		void gotMessage(ofMessage msg);
 
-		int HOW_MANY_POINTS = 60;
+		int POINTS_Y;
+		int POINTS_X;
+		float GRAVITY_X;
+		float GRAVITY_Y;
+		int length;
+		int temp_mass;
+		int stiffness;
 
-		int lineSegmentLength = 6;
-
-		int temp_mass = 10;
-
-		glm::vec2 startingPoint = { ofGetWidth() / 2, 10 };
+		glm::vec2 startingPoint;
 
 		float deltaTime;
 
 		int current;
+
+		glm::vec2 gravity;
 
 		std::vector<Point*> points;
 
@@ -44,13 +48,13 @@ class ofApp : public ofBaseApp{
 		void springForce(int& _lineSegmentLength);
 
 		// calculate gravity force and add it to force vect.
-		void gravity();
+		void applyGravity();
 
 		// motion equation, verlet integration
 		void verlet();
 
 		// setup points vector
-		void setupLine(int& _HOW_MANY_POINTS, int& _lineSegmentLength, int& _lastMass);
+		void setupCloth(int& _POINTS_X, int& _POINTS_Y, int& _lineSegmentLength, int& _lastMass);
 
 		// ------ CLOTH --------
 
@@ -60,9 +64,13 @@ class ofApp : public ofBaseApp{
 
 		ofxPanel gui;
 		ofxLabel guiLabel;
-		ofxIntSlider lineSegmentLengthSlider;
-		ofxIntSlider numOfPointsSlider;
-		ofxIntSlider massSlider;
+		ofxIntSlider slider_restlength;
+		ofxIntSlider slider_points_x;
+		ofxIntSlider slider_points_y;
+		ofxFloatSlider slider_gravity_x;
+		ofxFloatSlider slider_gravity_y;
+		ofxIntSlider slider_mass;
+		ofxIntSlider slider_stiffness;
 
 		std::string guiName;
 };
