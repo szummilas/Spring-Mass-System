@@ -48,6 +48,9 @@ void ofApp::update(){
 	// add gravity force to simulation
 	applyGravity();
 
+	// add drag to simulation
+	applyDrag();
+
 	// update points position based on verlet
 	for (int i = 0; i < points.size(); i++) {
 		points[i]->Verlet(points[i]->isLocked, deltaTime);
@@ -173,6 +176,15 @@ void ofApp::clearForce() {
 	}
 }
 
+void ofApp::applyDrag() {
+
+	for (int i = 0; i < points.size(); i++) {
+
+		// stokes' law -> F = 6 * pi * dynamic_viscosity * radius * velocity
+		points[i]->force += -6 * 3.14 * 17.8 * 10e-05 * points[i]->radius * points[i]->velocity;
+	}
+}
+
 void ofApp::applyGravity() {
 
 	for (int i = 0; i < points.size(); i++) {
@@ -200,6 +212,9 @@ void ofApp::verlet() {
 			points[i]->position = points[i]->position + (points[i]->position - points[i]->positionOld) + deltaTime * deltaTime * (points[i]->force / points[i]->mass);
 
 			points[i]->positionOld = tempPositionOld;
+
+			// velocity for drag
+			points[i]->velocity += (points[i]->force / points[i]->mass) / deltaTime;
 		}
 
 		else { }

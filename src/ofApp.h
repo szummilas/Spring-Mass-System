@@ -44,8 +44,8 @@ class ofApp : public ofBaseApp{
 		// clear force vector
 		void clearForce();
 
-		// calculate spring force and add it to force vect.
-		void springForce(int& _lineSegmentLength);
+		// calculate drag force
+		void applyDrag();
 
 		// calculate gravity force and add it to force vect.
 		void applyGravity();
